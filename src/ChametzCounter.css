@@ -1,0 +1,19 @@
+.chametz-counter {
+  display: flex;
+}
+
+.chametz-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+  animation: bounce 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
