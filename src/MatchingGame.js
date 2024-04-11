@@ -8,8 +8,7 @@ const symbols = ['🍷', '🍞', '🕊️', '🌿'];
 const MatchingGame = () => {
   // Define state variables using useState hook
   const [cards, setCards] = useState([]); // State for storing the cards
-  const [firstCard, setFirstCard] = useState(null); // State for the first selected card
-  const [secondCard, setSecondCard] = useState(null); // State for the second selected card
+  const [selectedCards, setSelectedCards] = useState([]); // State for selected cards
   const [matchedPairs, setMatchedPairs] = useState(0); // State for the number of matched pairs
 
   // useEffect hook to initialize the game when the component mounts
@@ -26,48 +25,47 @@ const MatchingGame = () => {
 
   // Function to reveal a card when clicked
   const revealCard = (index) => {
-    if (firstCard !== null && secondCard !== null) return; // Return if two cards are already selected
-    if (cards[index].matched) return; // Return if the card is already matched
+    if (selectedCards.length === 2 || cards[index].matched || cards[index].revealed) return; // Return if two cards are already selected or the card is already matched or revealed
 
     const updatedCards = [...cards]; // Create a copy of the cards array
     updatedCards[index].revealed = true; // Set the selected card to revealed
     setCards(updatedCards); // Update the state of cards
+    setSelectedCards([...selectedCards, index]); // Add the selected card to selectedCards
 
-    if (firstCard === null) {
-      setFirstCard(index); // Set the first selected card
-    } else {
-      setSecondCard(index); // Set the second selected card
-      checkMatch(); // Call the function to check if the selected cards match
+    if (selectedCards.length === 1) { // Check if two cards are selected
+      setTimeout(() => checkMatch(), 1000); // Check for a match after a delay of 1 second
     }
   }
 
   // Function to check if the selected cards match
   const checkMatch = () => {
-    if (cards[firstCard].symbol === cards[secondCard].symbol) { // If symbols match
+    const [firstIndex, secondIndex] = selectedCards; // Destructure the selected card indices
+    if (cards[firstIndex].symbol === cards[secondIndex].symbol) { // If symbols match
       const updatedCards = [...cards]; // Create a copy of the cards array
-      updatedCards[firstCard].matched = true; // Set the first card as matched
-      updatedCards[secondCard].matched = true; // Set the second card as matched
+      updatedCards[firstIndex].matched = true; // Set the first card as matched
+      updatedCards[secondIndex].matched = true; // Set the second card as matched
       setCards(updatedCards); // Update the state of cards
       setMatchedPairs(matchedPairs + 1); // Increment matched pairs count
     } else {
-      setTimeout(() => {
-        const updatedCards = [...cards]; // Create a copy of the cards array
-        updatedCards[firstCard].revealed = false; // Hide the first card
-        updatedCards[secondCard].revealed = false; // Hide the second card
-        setCards(updatedCards); // Update the state of cards
-      }, 1000); // Delay hiding unmatched cards for 1 second
+      const updatedCards = [...cards]; // Create a copy of the cards array
+      updatedCards[firstIndex].revealed = false; // Hide the first card
+      updatedCards[secondIndex].revealed = false; // Hide the second card
+      setCards(updatedCards); // Update the state of cards
     }
 
-    setFirstCard(null); // Reset the first selected card
-    setSecondCard(null); // Reset the second selected card
+    setSelectedCards([]); // Reset selectedCards
   }
 
   // Function to reset the game
   const resetGame = () => {
     generateSymbolCards(); // Regenerate symbol cards
-    setFirstCard(null); // Reset the first selected card
-    setSecondCard(null); // Reset the second selected card
     setMatchedPairs(0); // Reset the matched pairs count
+    setSelectedCards([]); // Reset selectedCards
+  }
+
+  // Helper function to determine card content based on state
+  const getCardContent = (card) => {
+    return card.revealed || card.matched ? card.symbol : '?';
   }
 
   // Define the JSX structure of the MatchingGame component
@@ -82,7 +80,7 @@ const MatchingGame = () => {
             className={`symbol-card ${card.revealed ? 'revealed' : ''} ${card.matched ? 'matched' : ''}`}
             onClick={() => revealCard(index)} // Attach event handler to reveal card on click
           >
-            {card.revealed || card.matched ? card.symbol : '?'} {/* Display symbol if revealed or matched, otherwise display '?' */}
+            {getCardContent(card)} {/* Determine card content */}
           </div>
         ))}
       </div>
@@ -96,4 +94,3 @@ const MatchingGame = () => {
 
 // Export the MatchingGame component to make it available for use in other files
 export default MatchingGame;
- 
